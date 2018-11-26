@@ -1,0 +1,148 @@
+<html>
+<head>
+    <title>rankLive</title>
+</head>
+<body>
+
+<div>
+    add user
+    <form>
+        <label for="">UserName</label>
+        <input type="text" id="username" placeholder=""/><br />
+        <label for="">Total</label>
+        <input type="text" id="usertotal" placeholder=""/><br />
+        <button type="button" id="sendBtn">add user</button>
+    </form>
+</div>
+
+<div>
+    add user score/total
+    <form>
+        <label for="">username</label>
+        <input type="text" id="usernamescore" placeholder=""/><br />
+        <label for="">score(+/-) or total </label>
+        <input type="text" id="newscore" placeholder=""/><br />
+        <button type="button" id="sendBtnAdd">add user</button>
+    </form>
+</div>
+
+<div>
+    rank user
+    <form>
+
+        <label for="">Top</label>
+        <input type="text" id="numtop" placeholder=""/><br />
+        <button type="button" id="sendBtnTop">get top</button>
+    </form>
+</div>
+
+<div>
+    relative rank
+    <form>
+
+        <label for="">Pos relative</label>
+        <input type="text" id="posrelative" placeholder=""/><br />
+        <label for="">Around relative</label>
+        <input type="text" id="aroundrelative" placeholder=""/><br />
+        <button type="button" id="sendBtnRel">get top relative</button>
+    </form>
+</div>
+<div id="container"></div>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        var ws;
+        if (window.WebSocket === undefined) {
+            $("#container").append("Your browser does not support WebSockets");
+            return;
+        } else {
+            ws = initWS();
+        }
+        function initWS() {
+            var socket = new WebSocket("ws://localhost:8080/ws"),
+                container = $("#container")
+            socket.onopen = function() {
+                container.append("<p>Socket is open</p>");
+            };
+            socket.onmessage = function (e) {
+                var obj = jQuery.parseJSON(e.data)
+                if (obj.Adduser){
+                    alert("correct add user")
+                    //container.append("<p> Añadido correctamente </p>");
+                }else  if (obj.Top) {
+                    cadena = "<p> ranking </p>"
+
+                    $.each(obj.Users, function(i, item) {
+                        userRank = obj.Users[i];
+
+                        cadena += "<p>"+ userRank.name+" - "+ userRank.total+"</p>"
+                    });
+                    container.empty()
+                    container.append(cadena);
+
+                }else  if (obj.Relative) {
+                    cadena = "<p> ranking relative </p>"
+
+                    $.each(obj.Users, function(i, item) {
+                        userRank = obj.Users[i];
+
+                        cadena += "<p>"+ userRank.name+" - "+ userRank.total+"</p>"
+                    });
+                    container.empty()
+                    container.append(cadena);
+                }else if (obj.AddScore){
+                    alert("correct add user score")
+                }
+
+            }
+            socket.onclose = function () {
+                container.append("<p>Socket closed</p>");
+            }
+            return socket;
+        }
+        $("#sendBtn").click(function (e) {
+            e.preventDefault();
+            ws.send(JSON.stringify(
+                {
+                    Adduser: true,
+                    User: {
+                        Name: $("#username").val(),
+                        Total : parseInt($("#usertotal").val())
+                    }
+                }));
+        });
+        $("#sendBtnTop").click(function (e) {
+            e.preventDefault();
+            ws.send(JSON.stringify(
+                {
+                    Top: true,
+                    Numtop : parseInt($("#numtop").val())
+                }));
+        });
+        $("#sendBtnRel").click(function (e) {
+            e.preventDefault();
+            ws.send(JSON.stringify(
+                {
+                    Relative: true,
+                    Posrelative: parseInt($("#posrelative").val()),
+                    Aroundrelative: parseInt($("#aroundrelative").val())
+
+                }));
+        });
+        $("#sendBtnAdd").click(function (e) {
+            e.preventDefault();
+            ws.send(JSON.stringify(
+                {
+                    AddScore: true,
+                    User: {
+                        Name: $("#usernamescore").val(),
+                    },
+                    Newscore: $("#newscore").val()
+
+                }));
+        });
+    });
+</script>
+</body>
+</html>
