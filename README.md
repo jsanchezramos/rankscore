@@ -12,6 +12,7 @@ Run de application:
 ```
 copy content in go/src
 cd rankscore
+go get github.com/gorilla/websocket
 go run main.go
 ```
 
