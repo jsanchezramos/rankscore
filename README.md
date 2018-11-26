@@ -11,7 +11,7 @@ Run de application:
 
 ```
 copy content in go/src
-cd socialpoint
+cd rankscore
 go run main.go
 ```
 
